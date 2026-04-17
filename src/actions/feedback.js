@@ -1,17 +1,20 @@
-"use server";
 
-/**
- * Server Action to handle feedback submission.
- * In a real Next.js app, this would run on the server.
- * In a Vite app with React 19, this serves as a client-side action handler.
- */
 export async function submitFeedback(prevState, formData) {
-  // Simulate network latency
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   const rating = formData.get("rating");
   const comment = formData.get("comment");
   const name = formData.get("name");
+  const employeeId = formData.get("employeeId");
+
+  console.log("Action Received Data:", { employeeId, name, rating, comment });
+
+  if (!employeeId || String(employeeId).trim().length === 0) {
+    return {
+      success: false,
+      message: "Please enter your employee id.",
+    };
+  }
 
   if (!name || name.trim().length < 2) {
     return {
@@ -27,27 +30,27 @@ export async function submitFeedback(prevState, formData) {
     };
   }
 
-  if (!comment || comment.length < 5) {
+  if (!comment || comment.trim().length < 3) {
     return {
       success: false,
-      message: "Comment must be at least 5 characters long.",
+      message: "Please enter your detailed feedback.",
     };
   }
 
   const feedbackData = {
     id: Date.now(),
+    employeeId: employeeId.toString(),
     name: name.toString(),
     rating: parseInt(rating.toString()),
-    comment: comment.toString(),
+    comment: comment ? comment.toString() : "",
     date: new Date().toLocaleTimeString(),
   };
 
-  // In a real app, you'd save this to a database
   console.log("Feedback Submitted:", feedbackData);
 
   return {
     success: true,
-    message: `Thank you ${name}! Your feedback has been recorded.`,
+    message: `Thank you, ${name}! Your feedback was received.`,
     data: feedbackData,
   };
 }
